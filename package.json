@@ -1,0 +1,17 @@
+{
+  "name": "content-decay-detector",
+  "version": "0.0.0",
+  "description": "Find pages whose traffic, links or freshness signals suggest content decay.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edilec/content-decay-detector"
+  }
+}
