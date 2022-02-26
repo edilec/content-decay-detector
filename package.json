@@ -1,17 +1,52 @@
 {
   "name": "content-decay-detector",
-  "version": "0.0.0",
-  "description": "Find pages whose traffic, links or freshness signals suggest content decay.",
+  "version": "0.1.0",
+  "description": "Compare two comparable windows of an exported metric and report pages whose recent window declined, with a minimum volume below which the answer is inconclusive rather than green.",
   "type": "module",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "test": "node --test"
+    "lint": "node --check src/rules.mjs && node --check src/dates.mjs && node --check src/series.mjs && node --check src/freshness.mjs && node --check src/score.mjs && node --check src/index.mjs && node --check bin/content-decay-detector.mjs && node --check test/helpers.mjs && node --check test/rules.test.mjs && node --check test/dates.test.mjs && node --check test/parse.test.mjs && node --check test/score.test.mjs && node --check test/project.test.mjs && node --check test/confinement.test.mjs && node --check test/honesty.test.mjs && node --check test/cli.test.mjs",
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/**",
+    "example": "node bin/content-decay-detector.mjs --config examples/clean/decay.config.json",
+    "pack:check": "npm pack --dry-run",
+    "check": "npm run lint && npm test && npm run example && npm run pack:check"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/edilec/content-decay-detector"
-  }
+    "url": "git+https://github.com/edilec/content-decay-detector.git"
+  },
+  "bin": {
+    "content-decay-detector": "./bin/content-decay-detector.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "examples",
+    "docs",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "content",
+    "decay",
+    "analytics",
+    "freshness",
+    "seasonality",
+    "editorial",
+    "audit",
+    "cli"
+  ],
+  "author": "Edilec Private Limited",
+  "bugs": {
+    "url": "https://github.com/edilec/content-decay-detector/issues"
+  },
+  "homepage": "https://github.com/edilec/content-decay-detector#readme"
 }
