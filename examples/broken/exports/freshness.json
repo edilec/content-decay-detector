@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1",
+  "pages": [
+    {
+      "page": "/blog/old-post",
+      "lastModified": "2020-02-11"
+    },
+    {
+      "page": "/guides/install",
+      "lastModified": "2021-01-05",
+      "inboundLinks": {
+        "baseline": 80,
+        "recent": 30
+      }
+    },
+    {
+      "page": "/guides/upgrade",
+      "lastModified": "2025-08-11",
+      "inboundLinks": {
+        "baseline": 21,
+        "recent": 22
+      }
+    },
+    {
+      "page": "/removed/page",
+      "lastModified": "2024-01-02",
+      "inboundLinks": {
+        "baseline": 4,
+        "recent": 0
+      }
+    }
+  ]
+}
