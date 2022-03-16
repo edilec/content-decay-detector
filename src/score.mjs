@@ -182,12 +182,19 @@ export function scorePages(observations, freshness, windows, policy) {
     const record = freshness.get(page)
     const where = at(record.file, `/pages/${record.index}`)
     if (!known.has(page)) {
-      findings.push(makeFinding(
-        'freshness-page-unknown',
-        msg`The freshness export describes ${page}, which no analytics row places inside either comparison window, so nothing was compared for it.`,
-        where,
-        { suggestion: 'Export analytics rows for this page, or drop it from the freshness export.' },
-      ))
+      // Only sayable when every analytics row was actually read. If any export
+      // or row was refused, this page might well be in the part that was not
+      // read, and reporting it as unknown would be stating a fact the run does
+      // not have. The run is already incomplete for that reason; it does not
+      // need a second, weaker claim on top.
+      if (policy.seriesComplete) {
+        findings.push(makeFinding(
+          'freshness-page-unknown',
+          msg`The freshness export describes ${page}, which no analytics row places inside either comparison window, so nothing was compared for it.`,
+          where,
+          { suggestion: 'Export analytics rows for this page, or drop it from the freshness export.' },
+        ))
+      }
       continue
     }
     if (record.lastModifiedDay !== null) {

@@ -53,13 +53,16 @@ export { SEASONALITY_RULES, buildWindow, comparabilityProblems, dayToIso, parseI
 export { FRESHNESS_KEYS, FRESHNESS_RECORD_KEYS, readFreshnessRecord, scanFreshness } from './freshness.mjs'
 export {
   CAUSAL_TERMS,
+  EVIDENCE_LIMIT,
   EVIDENCE_MISSING_RULES,
+  LINE_SEPARATORS,
   MAX_PAGE_ID_LENGTH,
   RULE_IDS,
   RULE_SEVERITY,
   SEVERITIES,
   SafeMessage,
   assertNoCausalClaim,
+  at,
   byCodeUnit,
   compareFindings,
   findCausalClaim,
@@ -451,6 +454,8 @@ export async function readTextBounded(file, maxBytes) {
   return { status: 'ok', reason: null, text }
 }
 
+const READ_LABELS = Object.freeze({ series: 'analytics', freshness: 'freshness' })
+
 const READ_RULES = Object.freeze({
   series: { unreadable: 'series-unreadable', tooLarge: 'series-too-large', notUtf8: 'series-not-utf8', unparsable: 'series-unparsable' },
   freshness: { unreadable: 'freshness-unreadable', tooLarge: 'freshness-too-large', notUtf8: 'freshness-not-utf8', unparsable: 'freshness-unparsable' },
@@ -465,21 +470,22 @@ const READ_RULES = Object.freeze({
  */
 async function loadDocument(kind, absolute, file, maxBytes, findings) {
   const rules = READ_RULES[kind]
+  const label = READ_LABELS[kind]
   const read = await readTextBounded(absolute, maxBytes)
   if (read.status === 'unreadable') {
-    findings.push(makeFinding(rules.unreadable, msg`The ${kind} export could not be read (${read.reason}).`, at(file, null), {
+    findings.push(makeFinding(rules.unreadable, msg`The ${label} export could not be read (${read.reason}).`, at(file, null), {
       suggestion: 'Produce the export before running the comparison, or correct the path in the config.',
     }))
     return null
   }
   if (read.status === 'too-large') {
-    findings.push(makeFinding(rules.tooLarge, msg`The ${kind} export was not read: ${read.reason}.`, at(file, null), {
+    findings.push(makeFinding(rules.tooLarge, msg`The ${label} export was not read: ${read.reason}.`, at(file, null), {
       suggestion: `Raise limits.max${kind === 'series' ? 'Series' : 'Freshness'}Bytes deliberately, or split the export.`,
     }))
     return null
   }
   if (read.status === 'not-utf8') {
-    findings.push(makeFinding(rules.notUtf8, msg`The ${kind} export was not decoded: ${read.reason}.`, at(file, null), {
+    findings.push(makeFinding(rules.notUtf8, msg`The ${label} export was not decoded: ${read.reason}.`, at(file, null), {
       suggestion: 'Write the export as UTF-8.',
     }))
     return null
@@ -487,7 +493,7 @@ async function loadDocument(kind, absolute, file, maxBytes, findings) {
   try {
     return JSON.parse(read.text)
   } catch (error) {
-    findings.push(makeFinding(rules.unparsable, msg`The ${kind} export is not valid JSON: ${error.message}.`, at(file, null), {
+    findings.push(makeFinding(rules.unparsable, msg`The ${label} export is not valid JSON: ${error.message}.`, at(file, null), {
       suggestion: 'Correct the JSON. Nothing was read from this file.',
     }))
     return null
@@ -562,6 +568,16 @@ export async function checkProject({ config, root, minimumVolume }) {
     }
   }
 
+  /**
+   * Whether the analytics side of the run is whole.
+   *
+   * Every way a row or an export can be refused is an evidence-missing rule, so
+   * this is exact at this point: if it is false, some analytics row was not
+   * read, and nothing downstream may claim to know what is absent from the
+   * data.
+   */
+  const seriesComplete = !findings.some((finding) => marksEvidenceMissing(finding.ruleId))
+
   const freshnessByPage = new Map()
   for (const [index, declared] of validated.freshness.entries()) {
     const absolute = await resolveWithin(inputRoot, realRoot, declared, `freshness[${index}]`)
@@ -602,7 +618,7 @@ export async function checkProject({ config, root, minimumVolume }) {
     return buildReport(findings, EMPTY_COUNTS)
   }
 
-  const scored = scorePages(observations, freshnessByPage, validated.windows, validated.policy)
+  const scored = scorePages(observations, freshnessByPage, validated.windows, { ...validated.policy, seriesComplete })
   findings.push(...scored.findings)
 
   if (scored.counts.scored === 0 && !findings.some((finding) => marksEvidenceMissing(finding.ruleId))) {
