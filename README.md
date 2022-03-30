@@ -207,9 +207,14 @@ npm run check
 ```
 
 `check` runs the linter, the test suite, the clean example, and a packaging dry
-run. The suite covers the public API and the real CLI, and every guarantee
-stated here and in [`docs/decay-rules.md`](./docs/decay-rules.md) has a test
-that fails when the guarantee is removed.
+run. The suite covers the public API and the real CLI.
+
+Every guarantee stated here and in [`docs/decay-rules.md`](./docs/decay-rules.md)
+is defended by a test that fails when the guarantee is taken out of the source.
+That is not a claim about intent: each one was removed in turn -- 66 single-line
+mutations, from dropping the minimum-volume gate to downgrading one severity to
+comparing paths lexically instead of by real path -- and the suite was run
+against each. All 66 were caught.
 
 ## Documentation
 
