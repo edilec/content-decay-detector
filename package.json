@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "lint": "node --check src/rules.mjs && node --check src/dates.mjs && node --check src/series.mjs && node --check src/freshness.mjs && node --check src/score.mjs && node --check src/index.mjs && node --check bin/content-decay-detector.mjs && node --check test/helpers.mjs && node --check test/rules.test.mjs && node --check test/dates.test.mjs && node --check test/parse.test.mjs && node --check test/score.test.mjs && node --check test/project.test.mjs && node --check test/confinement.test.mjs && node --check test/honesty.test.mjs && node --check test/cli.test.mjs",
+    "lint": "node --check src/rules.mjs && node --check src/dates.mjs && node --check src/series.mjs && node --check src/freshness.mjs && node --check src/score.mjs && node --check src/index.mjs && node --check bin/content-decay-detector.mjs && node --check test/helpers.mjs && node --check test/rules.test.mjs && node --check test/dates.test.mjs && node --check test/parse.test.mjs && node --check test/score.test.mjs && node --check test/project.test.mjs && node --check test/confinement.test.mjs && node --check test/honesty.test.mjs && node --check test/cli.test.mjs && node --check test/severity.test.mjs",
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/**",
     "example": "node bin/content-decay-detector.mjs --config examples/clean/decay.config.json",
