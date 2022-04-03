@@ -61,15 +61,30 @@ test('insufficient volume alone blocks a pass end to end', async (t) => {
   assert.equal(exitCodeFor(report), 2)
 })
 
-test('insufficient coverage alone blocks a pass end to end', async (t) => {
-  const site = await project(t, {
-    rows: [...rowsFor('/guides/a', BASELINE.start, 10, 100), ...rowsFor('/guides/a', RECENT.start, 10, 100)],
-  })
-  const report = await checkProject({ config: site.config })
-  assert.deepEqual(ruleIdsOf(report), ['insufficient-coverage'])
-  assert.equal(report.summary.errors, 0)
-  assert.equal(report.status, 'incomplete')
-  assert.equal(exitCodeFor(report), 2)
+test('insufficient coverage alone blocks a pass end to end, in either window', async (t) => {
+  // The gate is per window: too few days on *either* side is enough to refuse
+  // the comparison. The two asymmetric shapes are 21 days against 19, a gap of
+  // 2 that maxCoverageGapDays allows, so nothing but the per-window minimum
+  // stops them, and each pins one half of the condition.
+  const shapes = [
+    ['both windows short', 10, 10],
+    ['only the baseline window short', 19, 21],
+    ['only the recent window short', 21, 19],
+  ]
+  for (const [what, baselineDays, recentDays] of shapes) {
+    const site = await project(t, {
+      rows: [
+        ...rowsFor('/guides/a', BASELINE.start, baselineDays, 100),
+        ...rowsFor('/guides/a', RECENT.start, recentDays, 100),
+      ],
+    })
+    const report = await checkProject({ config: site.config })
+    assert.deepEqual(ruleIdsOf(report), ['insufficient-coverage'], what)
+    assert.equal(report.summary.errors, 0, what)
+    assert.equal(report.summary.scored, 0, what)
+    assert.equal(report.status, 'incomplete', what)
+    assert.equal(exitCodeFor(report), 2, what)
+  }
 })
 
 test('a coverage mismatch alone blocks a pass end to end', async (t) => {
