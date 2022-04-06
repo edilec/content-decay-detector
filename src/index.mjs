@@ -539,7 +539,11 @@ export async function checkProject({ config, root, minimumVolume }) {
   try {
     document = JSON.parse(configRead.text)
   } catch (error) {
-    throw new ConfigError(`The config is not valid JSON: ${error.message}`)
+    // The parser quotes a slice of the document it choked on, so the config
+    // file's own bytes reach stderr through this message. Every other untrusted
+    // string is sanitised where it is built; this one has no finding to be
+    // built into, so it is sanitised here.
+    throw new ConfigError(`The config is not valid JSON: ${sanitize(error.message, 200)}`)
   }
   const validated = validateConfig(document, { minimumVolume })
 

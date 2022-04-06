@@ -34,6 +34,14 @@ All notable changes to this project are recorded here. The format follows
   not conclude that anything is wrong.
 - Clean and deliberately broken example projects under `examples/`.
 
+### Fixed
+
+- The diagnostic for a configuration file that is not JSON quoted the parser's
+  message unsanitised, and that message carries a slice of the document. A
+  configuration whose bytes held `U+0085` or `U+202E` therefore reached stderr
+  raw and could forge a line or reverse displayed text. It is sanitised like
+  every other untrusted string now.
+
 ### Notes
 
 - Causal and ranking language is refused in code, not only in review. Finding

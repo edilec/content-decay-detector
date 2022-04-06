@@ -191,7 +191,15 @@ a page appears nowhere in the data, the tool would have to have read all of it.
   of the root is refused and a file genuinely inside a root that is itself
   reached through a link is still read.
 - Nothing is written. The tool reads its inputs and prints a report.
-- Input content is data. A page identifier is sanitised wherever it reaches the
-  report or the human summary, so an identifier carrying a newline cannot forge
-  a line in the summary, and one carrying a causal claim cannot make this tool
-  appear to have made it.
+- Input content is data. Every untrusted string that reaches the report or the
+  human summary is flattened first -- a page identifier, an export path, a
+  configuration key, an export key, an evidence excerpt, and the parser's own
+  complaint about a document it could not read. Removed: C0 `U+0000`-`U+001F`,
+  `DEL` `U+007F`, C1 `U+0080`-`U+009F`, `U+2028`, `U+2029`, and every Unicode
+  format character (`\p{Cf}`), which is what takes out the bidi controls
+  `U+200E`, `U+200F`, `U+202A`-`U+202E` and the isolates `U+2066`-`U+2069`.
+  C1 matters as much as C0: `U+0085` is a line break and `U+009B` is an 8-bit
+  CSI, so either forges a line in a terminal or a CI log. So an identifier
+  carrying a newline cannot forge a line in the summary, one carrying `U+202E`
+  cannot reverse what is displayed next to it, and one carrying a causal claim
+  cannot make this tool appear to have made it.
