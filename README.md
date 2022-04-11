@@ -211,10 +211,19 @@ run. The suite covers the public API and the real CLI.
 
 Every guarantee stated here and in [`docs/decay-rules.md`](./docs/decay-rules.md)
 is defended by a test that fails when the guarantee is taken out of the source.
-That is not a claim about intent: each one was removed in turn -- 66 single-line
-mutations, from dropping the minimum-volume gate to downgrading one severity to
-comparing paths lexically instead of by real path -- and the suite was run
-against each. All 66 were caught.
+That is not a claim about intent: each guarantee was removed in turn and the
+suite was run against the result.
+
+The guarantees that decide a verdict are pinned by what a run emits, not by one
+declaration agreeing with another. `test/severity.test.mjs` drives every rule in
+the catalog through the real CLI and checks the emitted severity, the status and
+the exit code against hand-written expectations, so a coordinated edit of the
+severity table, the documentation and the test catalog cannot hide a downgrade.
+`test/ordering.test.mjs` asserts the exact order of a real report over inputs
+that code units and collation order differently, so substituting a collating
+comparator fails it even though the source carries no `localeCompare`.
+`test/boundaries.test.mjs` pins both sides of twenty documented limits, against
+the 22 mutations that tighten each comparison by one.
 
 ## Documentation
 

@@ -24,13 +24,18 @@ finding takes its severity from that table. A finding built with an unknown rule
 id throws. The table in this document is asserted against the code in both
 directions by `test/rules.test.mjs`.
 
-That cross-check alone is not the defence, because editing this file and the
-code together satisfies it. `test/rules.test.mjs` therefore carries a third,
-hand-written copy of the catalog and asserts the status every rule alone
-produces, `test/honesty.test.mjs` runs real projects for each rule whose only
-defence is its evidence-missing marking and asserts the status and exit code
-they yield, and `test/project.test.mjs` reaches every read and limit rule
-through the filesystem. A downgrade has to get past all of them.
+That cross-check is not the defence, and neither is the third, hand-written
+copy of the catalog in `test/rules.test.mjs`: three declarations of the same
+thing can be edited together, and a coordinated edit satisfies all three.
+
+The defence is behavioural. `test/severity.test.mjs` builds a real project for
+every rule in this table, runs `bin/content-decay-detector.mjs` as a process,
+and checks what came out: the rule the report names, the `severity` field it
+carries, the `status` it derives, the summary counts, and the exit code the
+process returned. Every expectation there is written out by hand and none of
+them is read from a table. Downgrading a rule changes what a run emits, so no
+edit to a declaration can hide it. `test/honesty.test.mjs` additionally runs
+real projects for the rules whose only defence is the evidence-missing marking.
 
 - any `error` finding, and no missing evidence, means **fail** and exit 1
 - `warning` and `info` findings alone mean **pass** and exit 0
