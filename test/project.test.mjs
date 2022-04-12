@@ -90,6 +90,31 @@ test('a run that scored nothing is incomplete, never a vacuous pass', async (t) 
   assert.equal(exitCodeFor(report), 2)
 })
 
+test('a page whose rows all fall outside both windows is invisible', async (t) => {
+  // One of the documented ways an unflagged page can still be unhealthy: the
+  // comparison is about the two windows, so rows outside them are not part of
+  // it. The page is not counted, not reported, and does not stop the pass --
+  // even though its numbers collapsed between the two months it does cover.
+  const site = await project(t, {
+    rows: [
+      ...pageRows('/guides/install', 40, 41),
+      ...rowsFor('/collapsed-outside-the-windows', '2023-01-01', 30, 900),
+      ...rowsFor('/collapsed-outside-the-windows', '2023-06-01', 30, 1),
+    ],
+  })
+  const report = await checkProject({ config: site.config })
+  assert.deepEqual(report.findings, [])
+  assert.equal(report.status, 'pass')
+  assert.equal(exitCodeFor(report), 0)
+  assert.equal(report.summary.checked, 1, 'only the page with rows inside the windows is counted')
+  assert.equal(report.summary.observations, 60)
+  assert.equal(
+    renderReport(report).includes('collapsed-outside-the-windows'),
+    false,
+    'the page appears nowhere in the report',
+  )
+})
+
 test('the vacuous-pass guard does not double up on another explanation', async (t) => {
   const site = await project(t, { rows: [], files: { 'exports/analytics.json': seriesJson({ metric: 'users' }) } })
   const report = await checkProject({ config: site.config })

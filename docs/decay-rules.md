@@ -162,6 +162,12 @@ page fell to literal zero and your export omits zero rows, this tool sees a
 coverage gap rather than a collapse, and reports the page as inconclusive. Export
 zero rows explicitly if you want zeros counted as zeros.
 
+A row outside both windows is not a missing day; it is simply not part of either
+comparison. A page every one of whose rows falls outside both windows is
+therefore not counted in `summary.checked`, produces no finding, and does not
+stop the run passing. The windows are what the comparison is about, and a page
+the configuration did not ask about is not a page this tool reports on.
+
 ## Every number in a finding is a number that was read
 
 Totals, means and day counts describe the rows the tool actually accepted. If a

@@ -170,8 +170,12 @@ This tool reads numbers out of files and compares two windows of them. It
   of pages by badness here, and `declining` in the summary is a count, not a
   league table.
 - **That an unflagged page is healthy.** A page can be below `minimumVolume`, or
-  short of `minimumDays`, or absent from the export entirely. The first two are
-  reported as inconclusive; the third is invisible.
+  short of `minimumDays`, or absent from the export entirely, or present in the
+  export with every row falling outside both comparison windows. The first two
+  are reported as inconclusive. The last two are invisible: a page whose rows
+  all sit outside the windows is not counted in `summary.checked`, produces no
+  finding, and does not stop the run passing, however steeply its numbers moved
+  outside them. Only rows inside the two windows are compared.
 - **That a missing day means zero.** A date absent from the export is treated as
   no observation. If a page fell to literal zero and your export omits zero
   rows, this tool sees a coverage gap and says it cannot judge. Export zero rows
