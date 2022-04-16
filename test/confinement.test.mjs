@@ -84,6 +84,27 @@ test('a freshness path may not leave the root through a link either', async (t) 
   assert.equal(run.stderr.includes(SECRET), false)
 })
 
+test('a path naming the root itself, or the directory above it, is refused', async (t) => {
+  // Neither names a file, so nothing could be read from either; the point is
+  // that both are configuration errors with an empty stdout rather than an
+  // incomplete report blaming an unreadable export. "." resolves to the root
+  // and ".." to its parent, and each is one arm of the confinement check.
+  for (const [candidate, what] of [['.', 'the input root itself'], ['..', 'the directory above it']]) {
+    const site = await makeSite(t, { series: [candidate] })
+
+    const error = await checkProject({ config: site.config }).then(() => null, (thrown) => thrown)
+    assert.equal(error instanceof ConfigError, true, what)
+    assert.equal(error.rule, 'input-outside-root', what)
+    assert.equal(error.message.includes(SECRET), false, what)
+
+    const run = await runCli(['--config', site.config])
+    assert.equal(run.code, 2, what)
+    assert.equal(run.stdout, '', `a configuration refusal leaves stdout empty: ${what}`)
+    assert.match(run.stderr, /resolves outside the input root/u, what)
+    assert.equal(run.stderr.includes(SECRET), false, what)
+  }
+})
+
 test('a relative path that stays inside the root is allowed', async (t) => {
   const site = await makeSite(t, { series: ['exports/../exports/analytics.json'] })
   const report = await checkProject({ config: site.config })
