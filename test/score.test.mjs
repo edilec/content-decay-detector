@@ -90,6 +90,28 @@ test('minimum volume is what separates the two, and it is configurable', () => {
   assert.equal(statusFor(lowered.findings), 'fail')
 })
 
+test('a baseline of zero is inconclusive whatever the minimum volume is', () => {
+  // scorePages is public API and uses the policy it is handed. The CLI never
+  // supplies a minimum below 1, but a caller can, and then only the explicit
+  // zero arm of the volume gate stands between a baseline mean of 0 and a
+  // ratio of Infinity or NaN being reported as a comparison of two windows.
+  const permissive = { ...POLICY, minimumVolume: 0 }
+  const fell = score([
+    ...rowsFor('/p', BASELINE.start, 30, 0),
+    ...rowsFor('/p', RECENT.start, 30, 5),
+  ], { policy: permissive })
+  assert.deepEqual(ids(fell), ['insufficient-volume'])
+  assert.equal(statusFor(fell.findings), 'incomplete')
+  assert.equal(fell.counts.scored, 0)
+
+  const flat = score([
+    ...rowsFor('/p', BASELINE.start, 30, 0),
+    ...rowsFor('/p', RECENT.start, 30, 0),
+  ], { policy: permissive })
+  assert.deepEqual(ids(flat), ['insufficient-volume'], 'nor is 0 against 0 a comparison')
+  assert.equal(flat.counts.scored, 0)
+})
+
 test('a page short of the coverage minimum is inconclusive even with the volume', () => {
   const rows = [
     ...rowsFor('/guides/install', BASELINE.start, 10, 100),

@@ -426,6 +426,11 @@ export function validateConfig(document, overrides = {}) {
  * nothing. This is the only read path in the tool -- the configuration goes
  * through it too, because a config path that quietly accepts broken bytes is
  * the same defect one directory over.
+ *
+ * `ignoreBOM` is left at its default of false, which is what removes a leading
+ * byte order mark, so an export saved by a tool that writes one parses. There
+ * is deliberately no second strip after this: a file starting with two byte
+ * order marks is malformed, and refusing it as unparsable is the honest answer.
  */
 export async function readTextBounded(file, maxBytes) {
   let info
@@ -450,7 +455,6 @@ export async function readTextBounded(file, maxBytes) {
   } catch {
     return { status: 'not-utf8', reason: 'the bytes are not valid UTF-8', text: null }
   }
-  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1)
   return { status: 'ok', reason: null, text }
 }
 

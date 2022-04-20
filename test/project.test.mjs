@@ -146,9 +146,8 @@ test('every configurable limit is enforced, and exceeding one is never silent', 
   const cases = [
     [{ maxRows: 5 }, 'row-limit-exceeded'],
     [{ maxSeriesBytes: 32 }, 'series-too-large'],
-    [{ maxPages: 0 + 1 }, null],
   ]
-  for (const [limits, expected] of cases.slice(0, 2)) {
+  for (const [limits, expected] of cases) {
     const site = await project(t, { rows, config: { limits } })
     const report = await checkProject({ config: site.config })
     assert.deepEqual(ruleIdsOf(report), [expected], JSON.stringify(limits))
@@ -293,6 +292,22 @@ test('an export whose bytes are not UTF-8 is never decoded leniently', async (t)
   const report = await checkProject({ config: site.config })
   assert.deepEqual(ruleIdsOf(report), ['series-not-utf8'])
   assert.equal(report.status, 'incomplete')
+})
+
+test('a leading byte order mark is not part of the document', async (t) => {
+  // Plenty of editors and export tools write one. The decoder removes it
+  // because ignoreBOM is left false; nothing else does, so this is what says
+  // that option may not change.
+  const mark = String.fromCodePoint(0xfeff)
+  const root = await makeProject({
+    'decay.config.json': `${mark}${configJson()}`,
+    'exports/analytics.json': `${mark}${seriesJson({ rows: pageRows('/a', 40, 41) })}`,
+  })
+  t.after(() => removeProject(root))
+  const report = await checkProject({ config: join(root, 'decay.config.json') })
+  assert.deepEqual(report.findings, [])
+  assert.equal(report.status, 'pass')
+  assert.equal(report.summary.scored, 1)
 })
 
 test('a document holding a literal replacement character is still valid UTF-8', async (t) => {
