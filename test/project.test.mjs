@@ -18,7 +18,6 @@ import {
   BASELINE,
   RECENT,
   configJson,
-  freshnessJson,
   makeProject,
   pageRows,
   project,
@@ -373,11 +372,6 @@ test('a freshness export naming an unknown page reports it without failing', asy
   assert.deepEqual(ruleIdsOf(report), ['freshness-page-unknown'])
   assert.equal(report.status, 'pass')
   assert.equal(report.summary.info, 1)
-})
-
-test('the freshness export shape used in the fixtures round trips', () => {
-  const written = freshnessJson([{ page: '/a', lastModified: '2025-01-01' }])
-  assert.deepEqual(JSON.parse(written), { schemaVersion: '1', pages: [{ page: '/a', lastModified: '2025-01-01' }] })
 })
 
 test('a page is not called unknown when an analytics export was not read', async (t) => {

@@ -11,7 +11,6 @@ import {
   checkProject,
   exitCodeFor,
   findCausalClaim,
-  marksEvidenceMissing,
   renderReport,
   severityFor,
 } from '../src/index.mjs'
@@ -210,17 +209,6 @@ test('nothing in this tool writes to the filesystem', async () => {
   for (const [path, text] of await sources()) {
     for (const pattern of [/writeFile/u, /\bmkdir\b/u, /\brm\b\s*\(/u, /unlink/u, /appendFile/u]) {
       assert.equal(pattern.test(text), false, `${path} matches ${pattern}`)
-    }
-  }
-})
-
-test('every rule that reports missing evidence really does block a pass', () => {
-  for (const ruleId of EVIDENCE_MISSING_RULES) {
-    assert.equal(marksEvidenceMissing(ruleId), true, ruleId)
-  }
-  for (const ruleId of Object.keys(RULE_SEVERITY)) {
-    if (!EVIDENCE_MISSING_RULES.includes(ruleId)) {
-      assert.equal(marksEvidenceMissing(ruleId), false, `${ruleId} is marked without being listed`)
     }
   }
 })

@@ -15,7 +15,6 @@ import {
   assertNoCausalClaim,
   at,
   byCodeUnit,
-  compareFindings,
   findCausalClaim,
   makeFinding,
   marksEvidenceMissing,
@@ -215,7 +214,6 @@ test('ordering is by code unit, not by locale collation', () => {
   assert.equal(byCodeUnit('MAX_DUPLICATE_URLS', 'MAX_DUPLICATE_URL_ENTRIES'), -1)
   assert.equal(byCodeUnit('MAX_DUPLICATE_URL_ENTRIES', 'MAX_DUPLICATE_URLS'), 1)
   assert.equal(byCodeUnit('same', 'same'), 0)
-  assert.equal('MAX_DUPLICATE_URLS'.localeCompare('MAX_DUPLICATE_URL_ENTRIES') < 0, false)
 })
 
 test('findings sort by file, then pointer, then rule id, then message', () => {
@@ -245,7 +243,6 @@ test('findings sort by file, then pointer, then rule id, then message', () => {
     ],
   )
   assert.deepEqual(sortFindings([...input].reverse()), sortFindings(input), 'the sort depends on input order')
-  assert.equal(compareFindings(input[1], input[1]), 0)
 })
 
 test('status is incomplete for missing evidence, whatever the severity', () => {
