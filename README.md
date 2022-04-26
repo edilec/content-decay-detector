@@ -213,10 +213,13 @@ npm run check
 `check` runs the linter, the test suite, the clean example, and a packaging dry
 run. The suite covers the public API and the real CLI.
 
-Every guarantee stated here and in [`docs/decay-rules.md`](./docs/decay-rules.md)
-is defended by a test that fails when the guarantee is taken out of the source.
-That is not a claim about intent: each guarantee was removed in turn and the
-suite was run against the result.
+The guarantees stated here and in [`docs/decay-rules.md`](./docs/decay-rules.md)
+are meant to be defended by tests that fail when the guarantee is taken out of
+the source, and the defences are checked by mutation rather than by reading
+them: the guarantee is removed, the suite is run, and a defence that stays green
+is not a defence. That is a method, not a proof that nothing was missed -- a
+round of it found a guard that agreed with itself three ways and noticed
+nothing.
 
 The guarantees that decide a verdict are pinned by what a run emits, not by one
 declaration agreeing with another. `test/severity.test.mjs` drives every rule in
