@@ -54,5 +54,10 @@ All notable changes to this project are recorded here. The format follows
   and the three rules whose only defence is their evidence-missing marking
   (`insufficient-volume`, `insufficient-coverage`, `window-coverage-mismatch`)
   each have an end-to-end test that fails if that marking is removed.
+- Severity, the evidence markings and the sort order are pinned by what a run
+  emits, not by one declaration agreeing with another: every rule in the catalog
+  is driven through the CLI and its status and exit code checked against
+  hand-written expectations, and the ordering tests assert the exact sequence of
+  real reports over inputs that code-unit and collation ordering disagree about.
 - `0.1.0` is the version recorded in `package.json`. No release has been
   published.

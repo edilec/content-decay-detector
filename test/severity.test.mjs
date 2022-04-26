@@ -3,11 +3,12 @@
  *
  * The severity table, the documented table and the hand-written table in
  * `test/rules.test.mjs` are three declarations of the same thing, and three
- * declarations can be edited together. This file asserts none of them. For each
- * rule it builds a real project, runs `bin/content-decay-detector.mjs` as a
- * process, and checks the observable result: the rule the report names, the
- * `severity` field it carries, the `status` it derives, the summary counts, and
- * the exit code the process actually returned.
+ * declarations can be edited together. This file asserts none of them. For
+ * every rule in the catalog it builds a real project, runs
+ * `bin/content-decay-detector.mjs` as a process, and checks the observable
+ * result: the rule the report names, the `severity` field it carries, the
+ * `status` it derives, the summary counts, and the exit code the process
+ * actually returned.
  *
  * Every expectation below is written out by hand. Downgrading a rule in
  * `RULE_SEVERITY` changes the emitted `severity` and the summary counts;

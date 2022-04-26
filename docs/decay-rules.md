@@ -182,7 +182,11 @@ a page appears nowhere in the data, the tool would have to have read all of it.
 - Findings sort by `(location.file, location.pointer, ruleId, message)`, each
   compared by UTF-16 code unit. `localeCompare` is never used: it depends on ICU
   data that differs between Node builds, and it has already produced a real
-  ordering difference in this catalog.
+  ordering difference in this catalog. Scanning the source for that name is not
+  the defence -- any comparator that folds case or punctuation collates the same
+  way without it -- so `test/ordering.test.mjs` asserts the exact order of real
+  reports over inputs that code units and collation order differently, such as
+  `URLS` against `URL_ENTRIES`.
 - No wall clock is read. The only "now" the tool has is the end of the recent
   window, which the configuration supplies, and `stale-content` is measured
   against that.
