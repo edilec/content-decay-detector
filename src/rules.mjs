@@ -164,6 +164,29 @@ export function sanitize(value, limit = EVIDENCE_LIMIT) {
   return flat.length > limit ? `${flat.slice(0, limit - 3)}...` : flat
 }
 
+/**
+ * What a `JSON.parse` failure may say about a file this tool did not write.
+ *
+ * V8 reports a parse failure two ways, and one of them quotes the input back:
+ * `Unexpected token 'A', "AKIAIOSFODNN7EXAMPLE" is not valid JSON`. An export
+ * or a config short enough to be only a credential is therefore reproduced in
+ * full by its own error message, and `sanitize` does not stop it: that strips
+ * control characters and cuts from the end, while the quoted input sits at the
+ * front.
+ *
+ * The position is the useful half and carries no content, so it is kept
+ * whenever V8 offers one. The quoted half never leaves this function.
+ */
+export function parseFailureDetail(error) {
+  const message = String(error?.message ?? 'could not be parsed')
+  const position = /at position \d+(?: \(line \d+ column \d+\))?/u.exec(message)
+  if (position) return message.slice(0, position.index + position[0].length)
+  const token = /^Unexpected token (.+?), ".*?"(?:\.\.\.)? is not valid JSON$/su.exec(message)
+  if (token) return `unexpected token ${token[1]} at the start of the document`
+  if (/^Unexpected end of JSON input$/u.test(message)) return message
+  return 'the document could not be parsed as JSON'
+}
+
 /** A message whose literals have been checked and whose values are sanitised. */
 export class SafeMessage {
   constructor(text) {

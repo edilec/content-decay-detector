@@ -41,6 +41,7 @@ import {
   makeFinding,
   marksEvidenceMissing,
   msg,
+  parseFailureDetail,
   sanitize,
   severityFor,
   sortFindings,
@@ -69,6 +70,7 @@ export {
   makeFinding,
   marksEvidenceMissing,
   msg,
+  parseFailureDetail,
   pointerForPage,
   sanitize,
   severityFor,
@@ -497,7 +499,7 @@ async function loadDocument(kind, absolute, file, maxBytes, findings) {
   try {
     return JSON.parse(read.text)
   } catch (error) {
-    findings.push(makeFinding(rules.unparsable, msg`The ${label} export is not valid JSON: ${error.message}.`, at(file, null), {
+    findings.push(makeFinding(rules.unparsable, msg`The ${label} export is not valid JSON: ${parseFailureDetail(error)}.`, at(file, null), {
       suggestion: 'Correct the JSON. Nothing was read from this file.',
     }))
     return null
@@ -543,11 +545,13 @@ export async function checkProject({ config, root, minimumVolume }) {
   try {
     document = JSON.parse(configRead.text)
   } catch (error) {
-    // The parser quotes a slice of the document it choked on, so the config
-    // file's own bytes reach stderr through this message. Every other untrusted
-    // string is sanitised where it is built; this one has no finding to be
-    // built into, so it is sanitised here.
-    throw new ConfigError(`The config is not valid JSON: ${sanitize(error.message, 200)}`)
+    // The parser quotes the document it choked on -- the whole file when the
+    // file is short -- so the config's own bytes reached stderr through this
+    // message. Sanitising did not stop that and never could: it strips control
+    // characters and cuts from the end, and the quote is at the front.
+    // `parseFailureDetail` keeps the position and discards the quote; the
+    // sanitising pass stays, because every untrusted string gets one.
+    throw new ConfigError(`The config is not valid JSON: ${sanitize(parseFailureDetail(error), 200)}`)
   }
   const validated = validateConfig(document, { minimumVolume })
 

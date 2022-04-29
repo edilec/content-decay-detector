@@ -36,6 +36,15 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- A parse failure no longer reproduces the file it failed on. `JSON.parse`
+  reports a failure either by position or by quoting the input back —
+  `Unexpected token 'A', "AKIAIOSFODNN7EXAMPLE" is not valid JSON`, which is the
+  whole document when the document is short — and that quote sits at the front
+  of the message, where sanitising and the length cut both leave it intact. An
+  export or a configuration short enough to be only a credential was therefore
+  published by the very message that failed to read it, through
+  `series-unparsable`, `freshness-unparsable` and the config diagnostic on
+  stderr. All three are built from the position, line and column alone now.
 - The diagnostic for a configuration file that is not JSON quoted the parser's
   message unsanitised, and that message carries a slice of the document. A
   configuration whose bytes held `U+0085` or `U+202E` therefore reached stderr

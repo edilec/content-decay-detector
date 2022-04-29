@@ -218,3 +218,12 @@ a page appears nowhere in the data, the tool would have to have read all of it.
   carrying a newline cannot forge a line in the summary, one carrying `U+202E`
   cannot reverse what is displayed next to it, and one carrying a causal claim
   cannot make this tool appear to have made it.
+- Flattening is not what keeps an unreadable document's *content* out of the
+  report, and for a while nothing did. `JSON.parse` reports a failure either by
+  position or by quoting the input back — `Unexpected token 'A',
+  "AKIAIOSFODNN7EXAMPLE" is not valid JSON`, which is the entire document when
+  the document is short. That quote sits at the front of the message, so
+  flattening and the length cut both leave it intact. `series-unparsable`,
+  `freshness-unparsable` and the config diagnostic are now built from the
+  failure's position, line and column alone; the quoted input is discarded
+  before anything is recorded.
