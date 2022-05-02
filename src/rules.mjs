@@ -174,17 +174,45 @@ export function sanitize(value, limit = EVIDENCE_LIMIT) {
  * control characters and cuts from the end, while the quoted input sits at the
  * front.
  *
- * The position is the useful half and carries no content, so it is kept
- * whenever V8 offers one. The quoted half never leaves this function.
+ * Position, line and column are the useful half and say nothing about content,
+ * so they are kept whole. The quoted half never leaves this function. The
+ * closing guard is deliberate belt and braces: every parse message V8 emits
+ * without a snippet quotes JSON punctuation with apostrophes and holds no
+ * double quote at all, so a double quote surviving to the end means a wording
+ * this function has not been taught, and the generic sentence is used instead.
  */
 export function parseFailureDetail(error) {
-  const message = String(error?.message ?? 'could not be parsed')
-  const position = /at position \d+(?: \(line \d+ column \d+\))?/u.exec(message)
-  if (position) return message.slice(0, position.index + position[0].length)
-  const token = /^Unexpected token (.+?), ".*?"(?:\.\.\.)? is not valid JSON$/su.exec(message)
-  if (token) return `unexpected token ${token[1]} at the start of the document`
-  if (/^Unexpected end of JSON input$/u.test(message)) return message
-  return 'the document could not be parsed as JSON'
+  const message = String(error?.message ?? '')
+  const detail = describeParseFailure(message)
+  return detail.includes('"') ? UNPARSEABLE : detail
+}
+
+const UNPARSEABLE = 'the document could not be parsed as JSON'
+
+/** Where V8 puts the offending offset. Safe: an offset says nothing about content. */
+const POSITION = /at position \d+(?: \(line \d+ column \d+\))?/u
+
+/**
+ * The shape that quotes the input. It is recognised FIRST, and the order is the
+ * defence: an export whose own text reads `at position 1` makes V8 write
+ * `Unexpected token 'a', "at position 1" is not valid JSON`, so looking for the
+ * offset first finds that phrase INSIDE the quoted span and slices the document
+ * straight back out. The `s` flag matters too, because the quoted span can
+ * carry a newline. A leading `...` means the quoted run came from the middle of
+ * the document rather than its start.
+ */
+const QUOTES_THE_INPUT = /^Unexpected token (.+?), (\.\.\.)?".*"(?:\.\.\.)? is not valid JSON$/su
+
+function describeParseFailure(message) {
+  const quoting = QUOTES_THE_INPUT.exec(message)
+  if (quoting !== null) {
+    const where = quoting[2] === undefined ? 'at the start of the document' : 'inside the document'
+    return `unexpected token ${quoting[1]} ${where}`
+  }
+  const position = POSITION.exec(message)
+  if (position !== null) return message.slice(0, position.index + position[0].length)
+  if (message === 'Unexpected end of JSON input') return message
+  return UNPARSEABLE
 }
 
 /** A message whose literals have been checked and whose values are sanitised. */
