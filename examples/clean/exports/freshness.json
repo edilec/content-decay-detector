@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1",
+  "pages": [
+    {
+      "page": "/blog/release-notes",
+      "lastModified": "2025-07-19",
+      "inboundLinks": {
+        "baseline": 12,
+        "recent": 12
+      }
+    },
+    {
+      "page": "/guides/install",
+      "lastModified": "2025-06-01",
+      "inboundLinks": {
+        "baseline": 45,
+        "recent": 44
+      }
+    },
+    {
+      "page": "/guides/upgrade",
+      "lastModified": "2025-08-11",
+      "inboundLinks": {
+        "baseline": 21,
+        "recent": 22
+      }
+    }
+  ]
+}

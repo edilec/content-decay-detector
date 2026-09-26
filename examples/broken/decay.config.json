@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1",
+  "metric": "sessions",
+  "series": [
+    "exports/analytics.json"
+  ],
+  "freshness": [
+    "exports/freshness.json"
+  ],
+  "baseline": {
+    "start": "2024-09-01",
+    "end": "2024-09-30"
+  },
+  "recent": {
+    "start": "2025-09-01",
+    "end": "2025-09-30"
+  },
+  "seasonality": {
+    "rule": "year-over-year",
+    "excludePeriods": [
+      {
+        "start": "09-14",
+        "end": "09-16"
+      }
+    ]
+  },
+  "minimumVolume": 200,
+  "minimumDays": 20,
+  "maxCoverageGapDays": 2,
+  "stalenessDays": 540,
+  "thresholds": {
+    "decayRatio": 0.7,
+    "warnRatio": 0.9,
+    "linkRatio": 0.7,
+    "minimumLinks": 10
+  }
+}
