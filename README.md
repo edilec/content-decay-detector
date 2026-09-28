@@ -35,8 +35,10 @@ Node 22 or newer. No runtime dependencies, no dev dependencies, Node built-ins
 only.
 
 ```sh
-npm install content-decay-detector
+npm install github:edilec/content-decay-detector
 ```
+
+This installs the public GitHub source; `content-decay-detector` is not published to npm.
 
 ## Use
 
